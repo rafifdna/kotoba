@@ -1,0 +1,182 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+
+   Kotoba - dual Japanese/English subtitles for Crunchyroll
+   Copyright (C) 2026 Rafif Dzakwan Nur Azhari
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#kotoba-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+
+  /* Set from JS so size and face can change without a restyle. Size is in px,
+     already scaled to the player width by positionOverlay. */
+  --kotoba-size: 24px;
+  --kotoba-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic',
+                   'Noto Sans JP', Meiryo, sans-serif;
+  --kotoba-weight: 600;
+  --kotoba-backdrop: transparent;
+
+  font-family: var(--kotoba-family);
+}
+
+#kotoba-lines {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  text-align: center;
+  pointer-events: auto;
+  font-size: var(--kotoba-size);
+  /* Padding and radius scale with the text, so the backdrop stays proportional
+     at every size instead of looking cramped when the text grows. */
+  padding: 0.3em 0.7em;
+  border-radius: 0.35em;
+  background: var(--kotoba-backdrop);
+}
+
+.kotoba-line {
+  max-width: 92%;
+  line-height: 1.45;
+  color: #fff;
+  /* Four-way stroke beats a blur: haze reads as fog over bright frames, an
+     outline stays legible over anything. Expressed in em so the outline stays
+     proportional rather than turning into a heavy slab at small sizes. */
+  text-shadow:
+    -0.045em -0.045em 0 #000, 0.045em -0.045em 0 #000,
+    -0.045em 0.045em 0 #000, 0.045em 0.045em 0 #000,
+    0 0 0.2em rgba(0, 0, 0, 0.7);
+}
+
+#kotoba-jp {
+  font-weight: var(--kotoba-weight);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+#kotoba-en {
+  font-size: 0.6em;
+  color: #cfd6e4;
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+/* Blur the translation so you attempt the Japanese first, reveal on hover.
+   This is the whole pedagogical point of a dual-sub tool. */
+#kotoba-en.blurred { filter: blur(6px); opacity: 0.75; }
+#kotoba-en.blurred:hover { filter: none; opacity: 1; }
+
+#kotoba-jp .tok {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color 80ms ease;
+}
+#kotoba-jp .tok.hit {
+  background: rgba(122, 162, 247, 0.32);
+  box-shadow: 0 0 0 1px rgba(122, 162, 247, 0.5);
+}
+
+#kotoba-popup {
+  position: fixed;
+  pointer-events: auto;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 12px 14px;
+  background: rgba(18, 20, 28, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #e6e9f0;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+#kotoba-popup[hidden] { display: none; }
+#kotoba-popup .hdr { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+#kotoba-popup .term { font-size: 20px; font-weight: 600; }
+#kotoba-popup .reading { font-size: 13px; color: #8fa0c0; }
+#kotoba-popup .freq {
+  margin-left: auto; font-size: 11px; color: #7aa2f7;
+  border: 1px solid rgba(122, 162, 247, 0.35);
+  border-radius: 999px; padding: 1px 7px;
+}
+#kotoba-popup .reason { font-size: 12px; color: #9aa5b8; margin-bottom: 6px; }
+#kotoba-popup .senses { margin: 0; padding-left: 18px; }
+#kotoba-popup .senses li { margin-bottom: 3px; }
+#kotoba-popup .pos { display: block; font-size: 11px; color: #7f8ba3; font-style: italic; }
+#kotoba-popup .mine {
+  margin-top: 10px; width: 100%; padding: 7px;
+  background: #7aa2f7; color: #0d1017; border: 0; border-radius: 6px;
+  font-weight: 600; cursor: pointer;
+}
+#kotoba-popup .mine:hover { background: #92b4f9; }
+
+#kotoba-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  padding: 8px 14px;
+  background: rgba(18, 20, 28, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px; color: #e6e9f0; font-size: 13px;
+}
+#kotoba-toast[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  #kotoba-en, #kotoba-jp .tok { transition: none; }
+}
+
+/* Alternate readings. Shown when a surface is genuinely ambiguous, e.g. 行った
+   is the past of both 行く and 行う, spelled identically and both common. */
+#kotoba-popup .alts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+#kotoba-popup .alt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 6px;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: #9aa5b8;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+#kotoba-popup .alt:hover { background: rgba(122, 162, 247, 0.12); color: #e6e9f0; }
+#kotoba-popup .alt-term { font-size: 14px; font-weight: 600; flex: none; }
+#kotoba-popup .alt-gloss {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Romaji sits between the Japanese and the translation. Lighter and smaller
+   than the Japanese so the eye still treats the kanji line as primary: the
+   romaji is a pronunciation aid, not the thing you should be reading. */
+#kotoba-romaji {
+  font-size: 0.56em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #a9c4f0;
+  font-style: italic;
+}

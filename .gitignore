@@ -1,0 +1,15 @@
+# Build inputs, not outputs. The raw JMdict release is ~113MB and is
+# re-downloadable from the jmdict-simplified releases page at any time.
+jmdict-eng*.json
+jmdict-eng*.tgz
+jmdict-eng*.zip
+*.tgz
+
+# The full dictionary is 33MB. It is committed here so the repo is
+# self-contained, but if you push this anywhere, consider dropping it and
+# shipping only dict-common.jsonl, which covers essentially all dialogue.
+# Uncomment to exclude:
+# dict/dict-full.jsonl
+
+node_modules/
+.DS_Store

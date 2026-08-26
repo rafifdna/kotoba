@@ -1,0 +1,15 @@
+The dictionary files dict-common.jsonl and dict-full.jsonl are derived from
+JMdict, via the jmdict-simplified distribution (scriptin/jmdict-simplified),
+release 3.6.2, dated 2026-08-24.
+
+JMdict is the property of the Electronic Dictionary Research and Development
+Group (EDRDG) and is used in accordance with the Group's licence:
+Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+
+  https://www.edrdg.org/edrdg/licence.html
+  https://creativecommons.org/licenses/by-sa/4.0/
+
+The conversion performed here selects display forms, reorders senses so that
+archaic and rare ones sort last, and computes a sort weight. No gloss text was
+altered. Because these files are a derivative work, any redistribution must
+carry this attribution and remain under CC BY-SA 4.0.

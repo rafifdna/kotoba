@@ -1,0 +1,75 @@
+{
+  "manifest_version": 3,
+  "name": "Kotoba",
+  "version": "0.7.2",
+  "description": "Dual Japanese/English subtitles with dictionary lookup and Anki export, on Crunchyroll.",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "https://*.crunchyroll.com/*",
+    "https://*.crunchyrollcdn.com/*",
+    "https://jimaku.cc/*",
+    "http://127.0.0.1:8765/*"
+  ],
+  "background": {
+    "service_worker": "src/background/sw.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.crunchyroll.com/*",
+        "https://static.crunchyroll.com/*"
+      ],
+      "js": [
+        "src/main/hook.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://www.crunchyroll.com/*",
+        "https://static.crunchyroll.com/*"
+      ],
+      "js": [
+        "src/lib/ns.js",
+        "src/lib/subtitle-parse.js",
+        "src/lib/cue-index.js",
+        "src/content/bridge.js"
+      ],
+      "css": [
+        "src/content/overlay.css"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Kotoba"
+  },
+  "commands": {
+    "snap": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "Snap the current line to now"
+    },
+    "nudge-back": {
+      "suggested_key": {
+        "default": "Alt+Comma"
+      },
+      "description": "Japanese 200ms earlier"
+    },
+    "nudge-forward": {
+      "suggested_key": {
+        "default": "Alt+Period"
+      },
+      "description": "Japanese 200ms later"
+    }
+  }
+}

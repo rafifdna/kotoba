@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later
+
+Kotoba - dual Japanese/English subtitles for Crunchyroll
+Copyright (C) 2026 Rafif Dzakwan Nur Azhari
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      width: 340px; margin: 0; padding: 14px;
+      background: #12141c; color: #e6e9f0;
+      font: 13px/1.5 system-ui, sans-serif;
+    }
+    h1 { font-size: 14px; margin: 0 0 2px; }
+    .sub { color: #7f8ba3; font-size: 11px; margin-bottom: 12px; }
+    section { border-top: 1px solid rgba(255,255,255,0.08); padding: 12px 0; }
+    section:first-of-type { border-top: 0; padding-top: 0; }
+    h2 {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #7f8ba3; margin: 0 0 8px; font-weight: 600;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    label.row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    input[type=checkbox] { accent-color: #7aa2f7; }
+    button {
+      background: #7aa2f7; color: #0d1017; border: 0; border-radius: 6px;
+      padding: 7px 10px; font-weight: 600; cursor: pointer; font-size: 12px;
+    }
+    button.ghost {
+      background: transparent; color: #9aa5b8;
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+    button:disabled { opacity: 0.45; cursor: default; }
+    .drop {
+      border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px;
+      padding: 14px 10px; text-align: center; color: #9aa5b8; cursor: pointer;
+    }
+    .drop.over { border-color: #7aa2f7; background: rgba(122,162,247,0.08); }
+    .status { font-size: 11px; color: #7f8ba3; margin-top: 8px; }
+    .status.bad { color: #f7768e; }
+    .status.good { color: #9ece6a; }
+    .nudge { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+    input[type=number], input[type=text], input[type=password], select {
+      background: #1a1d28; border: 1px solid rgba(255,255,255,0.12);
+      color: #e6e9f0; border-radius: 5px; padding: 5px 7px; width: 100%;
+      box-sizing: border-box;
+    }
+    .field { margin-bottom: 8px; }
+    .field span { display: block; font-size: 11px; color: #7f8ba3; margin-bottom: 3px; }
+    ul.files { list-style: none; margin: 8px 0 0; padding: 0; max-height: 170px; overflow-y: auto; }
+    ul.files li {
+      padding: 6px 8px; border-radius: 5px; cursor: pointer;
+      display: flex; gap: 6px; align-items: center; font-size: 12px;
+    }
+    ul.files li:hover { background: rgba(122,162,247,0.12); }
+    .tag {
+      font-size: 9px; padding: 1px 5px; border-radius: 3px;
+      background: rgba(122,162,247,0.2); color: #7aa2f7; flex: none;
+    }
+    .tag.bd { background: rgba(247,118,142,0.18); color: #f7768e; }
+    .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    pre.diag {
+      background: #0d1017; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px; padding: 8px; font-size: 10px; line-height: 1.45;
+      margin: 8px 0 0; white-space: pre-wrap; color: #9aa5b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kotoba</h1>
+  <div class="sub" id="episode">No Crunchyroll episode detected</div>
+
+  <section>
+    <h2>Japanese track
+      <span>
+        <button class="ghost" id="selftest-btn" style="padding:3px 8px">Test overlay</button>
+        <button class="ghost" id="diag-btn" style="padding:3px 8px">Diagnose</button>
+      </span>
+    </h2>
+    <div class="field">
+      <span>Search jimaku.cc</span>
+      <input type="text" id="search-title" placeholder="show title" />
+    </div>
+    <div class="nudge" style="margin-top:0">
+      <input type="number" id="search-ep" min="1" value="1" style="width:70px" />
+      <button id="search-btn">Find subtitles</button>
+    </div>
+    <ul class="files" id="files"></ul>
+
+    <div class="drop" id="drop" style="margin-top:10px">or drop an .ass / .srt file</div>
+    <input type="file" id="file" accept=".ass,.ssa,.srt,.vtt" hidden />
+    <div class="status" id="track-status">None loaded</div>
+  </section>
+
+  <section>
+    <h2>Sync</h2>
+    <div class="sub" style="margin:0 0 8px">
+      With the video focused (popup closed): press <b>S</b> the instant a line is
+      spoken to snap the whole file to it. <b>Z</b> / <b>X</b> nudge by 200ms,
+      hold Shift for 1s. <b>H</b> hides subtitles, <b>I</b> flips top/bottom.
+      On a Mac the Alt shortcuts are the Option key.
+    </div>
+    <button id="snap" style="width:100%">Snap to current line (or press S)</button>
+    <button class="ghost" id="align" style="width:100%;margin-top:6px">Align to Crunchyroll timings</button>
+    <div class="status" id="align-status"></div>
+    <div class="nudge">
+      <button class="ghost" id="back">-200ms</button>
+      <input type="number" id="offset" step="0.05" value="0" />
+      <button class="ghost" id="fwd">+200ms</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Display</h2>
+    <label class="row"><input type="checkbox" id="showJapanese" /> Japanese line</label>
+    <label class="row"><input type="checkbox" id="showRomaji" /> Romaji line (needs dictionary)</label>
+    <label class="row"><input type="checkbox" id="showEnglish" /> English line</label>
+    <label class="row"><input type="checkbox" id="blurEnglish" /> Blur English until hover</label>
+    <label class="row"><input type="checkbox" id="pauseOnHover" /> Pause when hovering a line</label>
+    <label class="row"><input type="checkbox" id="stripCC" /> Strip caption labels like （真樹）</label>
+    <div class="field" style="margin-top:10px">
+      <span>Text size <b id="size-val">24</b>px</span>
+      <input type="range" id="fontSize" min="12" max="44" step="1" value="24"
+             style="width:100%;accent-color:#7aa2f7;padding:0" />
+    </div>
+    <div class="field">
+      <span>Typeface</span>
+      <select id="fontFamily">
+        <option value="sans">Gothic (sans) &mdash; clearest</option>
+        <option value="rounded">Maru Gothic (rounded)</option>
+        <option value="serif">Mincho (serif)</option>
+      </select>
+    </div>
+    <label class="row"><input type="checkbox" id="bold" /> Bold Japanese</label>
+    <label class="row"><input type="checkbox" id="backdrop" /> Dark panel behind text</label>
+
+    <div class="field" style="margin-top:8px">
+      <span>Position (use top if Crunchyroll's own subs collide)</span>
+      <select id="position">
+        <option value="bottom">Bottom</option>
+        <option value="top">Top</option>
+      </select>
+    </div>
+  </section>
+
+  <section>
+    <h2>Keys and dictionary</h2>
+    <div class="field">
+      <span>jimaku.cc API key (jimaku.cc/profile)</span>
+      <input type="password" id="jimakuKey" placeholder="paste key" />
+    </div>
+    <div class="status" id="dict-status">Checking dictionary…</div>
+    <input type="file" id="dict-file" accept=".json,.jsonl" hidden />
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button id="dict-import">Import JMdict</button>
+      <button class="ghost" id="dict-clear">Clear</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Anki</h2>
+    <div class="field">
+      <span>Card style</span>
+      <select id="cardStyle">
+        <option value="word">Word &rarr; meaning</option>
+        <option value="sentence">Sentence &rarr; meaning (recommended)</option>
+      </select>
+    </div>
+    <div class="field"><span>Deck</span><input type="text" id="ankiDeck" /></div>
+    <div class="field"><span>Note type</span><input type="text" id="ankiModel" /></div>
+  </section>
+
+  <pre class="diag" id="diag" hidden></pre>
+
+  <script src="popup.js"></script>
+</body>
+</html>
