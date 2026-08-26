@@ -339,6 +339,4 @@ alongside GPL code is mere aggregation and does not relicense either one.
 
 This overlays subtitles on content you are already authenticated to watch. It
 does not touch DRM and does not redistribute video, the same posture as
-asbplayer and Language Reactor. It is still likely against Crunchyroll's terms
-of service, and extensions in this category have been removed from the Chrome
-Web Store before. Fine for personal use; think hard before publishing.
+asbplayer and Language Reactor.
